@@ -87,6 +87,10 @@ class AdvancedChatAppGenerator(MessageBasedAppGenerator):
             workflow=workflow
         )
 
+        if invoke_from == InvokeFrom.DEBUGGER:
+            # always enable retriever resource in debugger mode
+            app_config.additional_features.show_retrieve_source = True
+
         # get tracing instance
         tracing_instance = OpsTraceService.get_ops_trace_instance(
             app_id=app_model.id
