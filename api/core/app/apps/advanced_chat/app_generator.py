@@ -93,6 +93,10 @@ class AdvancedChatAppGenerator(MessageBasedAppGenerator):
         # get tracing instance
         trace_manager = TraceQueueManager(app_id=app_model.id)
 
+        if invoke_from == InvokeFrom.DEBUGGER:
+            # always enable retriever resource in debugger mode
+            app_config.additional_features.show_retrieve_source = True
+
         # init application generate entity
         application_generate_entity = AdvancedChatAppGenerateEntity(
             task_id=str(uuid.uuid4()),
@@ -115,7 +119,7 @@ class AdvancedChatAppGenerator(MessageBasedAppGenerator):
             invoke_from=invoke_from,
             application_generate_entity=application_generate_entity,
             conversation=conversation,
-            stream=stream,
+            stream=stream
         )
     
     def single_iteration_generate(self, app_model: App,
@@ -237,7 +241,7 @@ class AdvancedChatAppGenerator(MessageBasedAppGenerator):
             conversation=conversation,
             message=message,
             user=user,
-            stream=stream,
+            stream=stream
         )
 
         return AdvancedChatAppGenerateResponseConverter.convert(
