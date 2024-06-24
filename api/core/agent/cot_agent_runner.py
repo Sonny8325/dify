@@ -45,7 +45,6 @@ class CotAgentRunner(BaseAgentRunner, ABC):
         self._init_react_state(query)
 
         # get tracing instance
-        tracing_instance = app_generate_entity.tracing_instance
         trace_manager = app_generate_entity.trace_manager
 
         # check model mode

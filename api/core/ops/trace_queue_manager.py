@@ -54,10 +54,10 @@ class TraceTask:
         self.kwargs = kwargs
         self.file_base_url = os.getenv("FILES_URL", "http://127.0.0.1:5001")
 
-    def execute(self, trace_instance: BaseTraceInstance):
+    def execute(self, tracing_instance: BaseTraceInstance):
         method_name, trace_info = self.preprocess()
-        if trace_instance:
-            method = trace_instance.trace
+        if tracing_instance:
+            method = tracing_instance.trace
             method(trace_info)
 
     def preprocess(self):
@@ -393,7 +393,7 @@ class TraceQueueManager:
         self.thread = threading.Thread(
             target=self.process_queue, kwargs={
                 'flask_app': current_app._get_current_object(),
-                'trace_instance': tracing_instance
+                'tracing_instance': tracing_instance
             }
         )
         self.thread.start()
@@ -401,12 +401,12 @@ class TraceQueueManager:
     def stop(self):
         self.is_running = False
 
-    def process_queue(self, flask_app: Flask, trace_instance: BaseTraceInstance):
+    def process_queue(self, flask_app: Flask, tracing_instance: BaseTraceInstance):
         with flask_app.app_context():
             while self.is_running:
                 try:
                     task = self.queue.get(timeout=60)
-                    task.execute(trace_instance)
+                    task.execute(tracing_instance)
                     self.queue.task_done()
                 except queue.Empty:
                     self.stop()
