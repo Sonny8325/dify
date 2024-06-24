@@ -25,7 +25,6 @@ from extensions.ext_database import db
 from models.account import Account
 from models.model import App, Conversation, EndUser, Message
 from models.workflow import Workflow
-from services.ops_trace.ops_trace_service import OpsTraceService
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +47,6 @@ class AdvancedChatAppGenerator(MessageBasedAppGenerator):
         :param args: request args
         :param invoke_from: invoke from source
         :param stream: is stream
-        :param tracing_instance: tracing instance
         """
         if not args.get('query'):
             raise ValueError('query is required')
@@ -93,10 +91,7 @@ class AdvancedChatAppGenerator(MessageBasedAppGenerator):
             app_config.additional_features.show_retrieve_source = True
 
         # get tracing instance
-        tracing_instance = OpsTraceService.get_ops_trace_instance(
-            app_id=app_model.id
-        )
-        trace_manager = TraceQueueManager()
+        trace_manager = TraceQueueManager(app_id=app_model.id)
 
         # init application generate entity
         application_generate_entity = AdvancedChatAppGenerateEntity(
@@ -110,7 +105,6 @@ class AdvancedChatAppGenerator(MessageBasedAppGenerator):
             stream=stream,
             invoke_from=invoke_from,
             extras=extras,
-            tracing_instance=tracing_instance,
             trace_manager=trace_manager
         )
 
@@ -342,7 +336,7 @@ class AdvancedChatAppGenerator(MessageBasedAppGenerator):
         )
 
         try:
-            return generate_task_pipeline.process(workflow)
+            return generate_task_pipeline.process()
         except ValueError as e:
             if e.args[0] == "I/O operation on closed file.":  # ignore this error
                 raise GenerateTaskStoppedException()

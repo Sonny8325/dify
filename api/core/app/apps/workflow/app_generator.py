@@ -3,7 +3,7 @@ import os
 import threading
 import uuid
 from collections.abc import Generator
-from typing import Any, Optional, Union
+from typing import Union
 
 from flask import Flask, current_app
 from pydantic import ValidationError
@@ -25,7 +25,6 @@ from extensions.ext_database import db
 from models.account import Account
 from models.model import App, EndUser
 from models.workflow import Workflow
-from services.ops_trace.ops_trace_service import OpsTraceService
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +38,6 @@ class WorkflowAppGenerator(BaseAppGenerator):
         invoke_from: InvokeFrom,
         stream: bool = True,
         call_depth: int = 0,
-        tracing_instance: Optional[Any] = None
     ) -> Union[dict, Generator[dict, None, None]]:
         """
         Generate App response.
@@ -51,7 +49,6 @@ class WorkflowAppGenerator(BaseAppGenerator):
         :param invoke_from: invoke from source
         :param stream: is stream
         :param call_depth: call depth
-        :param tracing_instance: ops tracing instance
         """
         inputs = args['inputs']
 
@@ -75,10 +72,7 @@ class WorkflowAppGenerator(BaseAppGenerator):
         )
 
         # get tracing instance
-        tracing_instance = OpsTraceService.get_ops_trace_instance(
-            app_id=app_model.id,
-        )
-        trace_manager = TraceQueueManager()
+        trace_manager = TraceQueueManager(app_model.id)
 
         # init application generate entity
         application_generate_entity = WorkflowAppGenerateEntity(
@@ -90,7 +84,6 @@ class WorkflowAppGenerator(BaseAppGenerator):
             stream=stream,
             invoke_from=invoke_from,
             call_depth=call_depth,
-            tracing_instance=tracing_instance,
             trace_manager=trace_manager
         )
 
