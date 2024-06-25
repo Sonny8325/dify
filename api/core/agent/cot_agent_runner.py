@@ -15,7 +15,7 @@ from core.model_runtime.entities.message_entities import (
     ToolPromptMessage,
     UserPromptMessage,
 )
-from core.ops.trace_queue_manager import TraceQueueManager
+from core.ops.ops_trace_manager import TraceQueueManager
 from core.prompt.agent_history_prompt_transform import AgentHistoryPromptTransform
 from core.tools.entities.tool_entities import ToolInvokeMeta
 from core.tools.tool.tool import Tool
@@ -394,13 +394,6 @@ class CotAgentRunner(BaseAgentRunner, ABC):
         result: list[PromptMessage] = []
         scratchpads: list[AgentScratchpadUnit] = []
         current_scratchpad: AgentScratchpadUnit = None
-
-        self.history_prompt_messages = AgentHistoryPromptTransform(
-            model_config=self.model_config,
-            prompt_messages=current_session_messages or [],
-            history_messages=self.history_prompt_messages,
-            memory=self.memory
-        ).get_prompt()
 
         for message in self.history_prompt_messages:
             if isinstance(message, AssistantPromptMessage):
